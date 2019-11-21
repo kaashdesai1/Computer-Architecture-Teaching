@@ -47,4 +47,6 @@ int main(int argc, const char *argv[])
         tick(controller);
         ++cycles;
     }
+
+    printf("End Execution Time: ""%"PRIu64"\n", cycles);
 }
