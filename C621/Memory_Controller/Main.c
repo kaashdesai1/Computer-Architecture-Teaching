@@ -48,5 +48,9 @@ int main(int argc, const char *argv[])
         ++cycles;
     }
 
+    free(controller->bank_status);
+    free(controller->waiting_queue);
+    free(controller->pending_queue);
+    free(controller);
     printf("End Execution Time: ""%"PRIu64"\n", cycles);
 }
