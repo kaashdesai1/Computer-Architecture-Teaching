@@ -1,14 +1,14 @@
 #include "Trace.h"
 
-#include "Controller.h"
+#include "Mem_System.h"
 
 extern TraceParser *initTraceParser(const char * mem_file);
 extern bool getRequest(TraceParser *mem_trace);
 
-extern Controller *initController();
-extern unsigned ongoingPendingRequests(Controller *controller);
-extern bool send(Controller *controller, Request *req);
-extern void tick(Controller *controller);
+extern MemorySystem *initMemorySystem();
+extern unsigned pendingRequests(MemorySystem *mem_system);
+extern bool access(MemorySystem *mem_system, Request *req);
+extern void tickEvent(MemorySystem *mem_system);
 
 int main(int argc, const char *argv[])
 {	
@@ -22,8 +22,8 @@ int main(int argc, const char *argv[])
     // Initialize a CPU trace parser
     TraceParser *mem_trace = initTraceParser(argv[1]);
 
-    // Initialize a Controller
-    Controller *controller = initController();
+    // Initialize the memory system
+    MemorySystem *mem_system = initMemorySystem();
     // printf("%u\n", controller->bank_shift);
     // printf("%u\n", controller->bank_mask);
 
@@ -32,7 +32,7 @@ int main(int argc, const char *argv[])
     bool stall = false;
     bool end = false;
 
-    while (!end || ongoingPendingRequests(controller))
+    while (!end || pendingRequests(mem_system))
     {
         if (!end && !stall)
         {
@@ -41,21 +41,23 @@ int main(int argc, const char *argv[])
 
         if (!end)
         {
-            stall = !(send(controller, mem_trace->cur_req));
+            stall = !(access(mem_system, mem_trace->cur_req));
 	    
             printf("%u ", mem_trace->cur_req->core_id);
             printf("%u ", mem_trace->cur_req->req_type);
             printf("%"PRIu64" \n", mem_trace->cur_req->memory_address);
-
         }
 
-        tick(controller);
+        tickEvent(mem_system);
         ++cycles;
     }
 
+    // TODO, de-allocate memory
+    /*
     free(controller->bank_status);
     free(controller->waiting_queue);
     free(controller->pending_queue);
     free(controller);
+    */
     printf("End Execution Time: ""%"PRIu64"\n", cycles);
 }

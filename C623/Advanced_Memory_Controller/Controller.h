@@ -15,8 +15,9 @@ extern void deleteNode(Queue *q, Node *node);
 
 // CONSTANTS
 static unsigned MAX_WAITING_QUEUE_SIZE = 64;
-static unsigned BLOCK_SIZE = 128; // cache block size
-static unsigned NUM_OF_BANKS = 2; // number of banks
+static unsigned BLOCK_SIZE = 64; // cache block size
+static unsigned NUM_OF_CHANNELS = 4; // 4 channels/controllers in total
+static unsigned NUM_OF_BANKS = 32; // number of banks per channel
 
 // DRAM Timings
 static unsigned nclks_read = 53;
@@ -65,7 +66,7 @@ Controller *initController()
     controller->waiting_queue = initQueue();
     controller->pending_queue = initQueue();
 
-    controller->bank_shift = log2(BLOCK_SIZE);
+    controller->bank_shift = log2(BLOCK_SIZE) + log2(NUM_OF_CHANNELS);
     controller->bank_mask = (uint64_t)NUM_OF_BANKS - (uint64_t)1;
 
     return controller;
