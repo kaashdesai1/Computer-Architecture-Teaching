@@ -20,6 +20,7 @@ static unsigned NUM_OF_CHANNELS = 4; // 4 channels/controllers in total
 static unsigned NUM_OF_BANKS = 32; // number of banks per channel
 
 // DRAM Timings
+static unsigned nclks_channel = 15;
 static unsigned nclks_read = 53;
 static unsigned nclks_write = 53;
 
@@ -132,7 +133,8 @@ void tick(Controller *controller)
         Node *first = controller->waiting_queue->first;
         int target_bank_id = first->bank_id;
 
-        if ((controller->bank_status)[target_bank_id].next_free <= controller->cur_clk)
+        if ((controller->bank_status)[target_bank_id].next_free <= controller->cur_clk && 
+            controller->channel_next_free <= controller->cur_clk)
         {
             first->begin_exe = controller->cur_clk;
             if (first->req_type == READ)
@@ -145,6 +147,7 @@ void tick(Controller *controller)
             }
             // The target bank is no longer free until this request completes.
             (controller->bank_status)[target_bank_id].next_free = first->end_exe;
+            controller->channel_next_free = controller->cur_clk + nclks_channel;
 
             migrateToQueue(controller->pending_queue, first);
             deleteNode(controller->waiting_queue, first);
