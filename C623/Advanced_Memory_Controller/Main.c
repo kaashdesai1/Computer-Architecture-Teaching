@@ -43,9 +43,9 @@ int main(int argc, const char *argv[])
         {
             stall = !(access(mem_system, mem_trace->cur_req));
 	    
-            printf("%u ", mem_trace->cur_req->core_id);
-            printf("%u ", mem_trace->cur_req->req_type);
-            printf("%"PRIu64" \n", mem_trace->cur_req->memory_address);
+            // printf("%u ", mem_trace->cur_req->core_id);
+            // printf("%u ", mem_trace->cur_req->req_type);
+            // printf("%"PRIu64" \n", mem_trace->cur_req->memory_address);
         }
 
         tickEvent(mem_system);

@@ -118,10 +118,12 @@ void tick(Controller *controller)
             /*
             printf("Clk: ""%"PRIu64"\n", controller->cur_clk);
             printf("Address: ""%"PRIu64"\n", first->mem_addr);
+            printf("Channel ID: %d\n", first->channel_id);
             printf("Bank ID: %d\n", first->bank_id);
             printf("Begin execution: ""%"PRIu64"\n", first->begin_exe);
             printf("End execution: ""%"PRIu64"\n\n", first->end_exe);
             */
+
             deleteNode(controller->pending_queue, first);
         }
     }

@@ -18,6 +18,7 @@ typedef struct Node
     uint64_t mem_addr;
     Request_Type req_type; // Request type
 
+    int channel_id;
     int bank_id; // Which bank the request targets to
 
     // Some timing informations.
@@ -53,6 +54,7 @@ void pushToQueue(Queue *q, Request *req)
     Node *node = (Node *)malloc(sizeof(Node));
     node->mem_addr = req->memory_address;
     node->req_type = req->req_type;
+    node->channel_id = req->channel_id;
     node->bank_id = req->bank_id;
 
     node->prev = NULL;
@@ -99,6 +101,7 @@ void migrateToQueue(Queue *q, Node *_node)
     Node *node = (Node *)malloc(sizeof(Node));
     node->mem_addr = _node->mem_addr;
     node->req_type = _node->req_type;
+    node->channel_id = _node->channel_id;
     node->bank_id = _node->bank_id;
     node->begin_exe = _node->begin_exe;
     node->end_exe = _node->end_exe;

@@ -16,6 +16,7 @@ typedef struct Request
     uint64_t memory_address;
 
     /* Decoding Info */
+    int channel_id;
     int bank_id; // Which bank it targets to.
 
 }Request;

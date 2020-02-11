@@ -51,6 +51,7 @@ bool access(MemorySystem *mem_system, Request *req)
     unsigned channel_id = ((req->memory_address) >> mem_system->channel_shift) 
         & mem_system->channel_mask;
 
+    req->channel_id = channel_id;
     return send(mem_system->controllers[channel_id], req);
 }
 
