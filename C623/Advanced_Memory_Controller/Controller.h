@@ -23,6 +23,7 @@ static unsigned NUM_OF_BANKS = 32; // number of banks per channel
 static unsigned nclks_channel = 15;
 static unsigned nclks_read = 53;
 static unsigned nclks_write = 53;
+static unsigned choice_sheduler=1;
 
 // PCM Timings
 // static unsigned nclks_read = 57;
@@ -39,6 +40,8 @@ typedef struct Controller
 
     // Channel status
     uint64_t channel_next_free;
+    uint64_t channel_next_available;
+
 
     // A queue contains all the requests that are waiting to be issued.
     Queue *waiting_queue;
@@ -50,6 +53,7 @@ typedef struct Controller
     /* For decoding */
     unsigned bank_shift;
     uint64_t bank_mask;
+    int sheduler; //1 is for FCFS and 2 is for FR FCFS;
 
 }Controller;
 
@@ -63,13 +67,17 @@ Controller *initController()
     }
     controller->cur_clk = 0;
     controller->channel_next_free = 0;
+    controller->channel_next_available = 0;
+
 
     controller->waiting_queue = initQueue();
     controller->pending_queue = initQueue();
 
     controller->bank_shift = log2(BLOCK_SIZE) + log2(NUM_OF_CHANNELS);
     controller->bank_mask = (uint64_t)NUM_OF_BANKS - (uint64_t)1;
-
+    
+    controller->sheduler=choice_of_sheduler;
+    
     return controller;
 }
 
@@ -99,6 +107,8 @@ bool send(Controller *controller, Request *req)
 
 void tick(Controller *controller)
 {
+    cout<<"Enter the choice for sheduler, press 1 for FCFS and 2 fro FR FCFS";
+    cin>>choice_sheduler;
     // Step one, update system stats
     ++(controller->cur_clk);
     // printf("Clk: ""%"PRIu64"\n", controller->cur_clk);
@@ -134,10 +144,17 @@ void tick(Controller *controller)
         // Implementation One - FCFS
         Node *first = controller->waiting_queue->first;
         int target_bank_id = first->bank_id;
-
-        if ((controller->bank_status)[target_bank_id].next_free <= controller->cur_clk && 
-            controller->channel_next_free <= controller->cur_clk)
+        
+        if(choice_sheduler==2)
         {
+            
+            if ((controller->bank_status)[target_bank_id].next_available <= controller->cur_clk && 
+            controller->channel_next_available <= controller->cur_clk)
+        }
+        
+        else if ((controller->bank_status)[target_bank_id].next_free <= controller->cur_clk && 
+            controller->channel_next_free <= controller->cur_clk)
+        
             first->begin_exe = controller->cur_clk;
             if (first->req_type == READ)
             {
@@ -147,14 +164,46 @@ void tick(Controller *controller)
             {
                 first->end_exe = first->begin_exe + (uint64_t)nclks_write;
             }
+           
+            if(choice_sheduler==2)
+            {
+                // The target bank should be given to available once there is a request
+                (controller->bank_status)[target_bank_id].next_available = first->end_exe;
+                controller->channel_next_available = controller->cur_clk + nclks_channel;
+            }
             // The target bank is no longer free until this request completes.
-            (controller->bank_status)[target_bank_id].next_free = first->end_exe;
-            controller->channel_next_free = controller->cur_clk + nclks_channel;
-
+            else
+            {
+                (controller->bank_status)[target_bank_id].next_free = first->end_exe;
+                controller->channel_next_free = controller->cur_clk + nclks_channel;
+            }
             migrateToQueue(controller->pending_queue, first);
             deleteNode(controller->waiting_queue, first);
         }
     }
 }
 
+//definition of latency function 
+float access_latency(float avg_clock_cycles, int NUM_OF_BANKS)
+{
+    /*Access latency is the number of
+(memory) clock cycles between the time a request is inserted in the 
+transaction queue and the time it’sscheduled*/
+float diff_in_clock_cycles=(controller->bank_status[0]).cur_clk
+
+for(int i=0;i<NUM_OF_BANKS;i++)
+{
+    diff_in_clock_cycles-=(controller->bank_status[i]).cur_clk;
+}
+
+diff_in_clock_cycles=abs(diff_in_clock_cycles);
+
+return diff_in_clock_cycles;
+
+}
+
+uint64_t number_of_conflict()
+{
+    return controller->bank_shift-controller->clk;
+}
 #endif
