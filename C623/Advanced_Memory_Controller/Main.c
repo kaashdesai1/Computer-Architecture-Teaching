@@ -9,6 +9,8 @@ extern MemorySystem *initMemorySystem();
 extern unsigned pendingRequests(MemorySystem *mem_system);
 extern bool access(MemorySystem *mem_system, Request *req);
 extern void tickEvent(MemorySystem *mem_system);
+//adding the access latency function prototype
+float access_latency(float avg_clock_cycles, int NUM_OF_BANKS);
 
 int main(int argc, const char *argv[])
 {	
@@ -59,5 +61,10 @@ int main(int argc, const char *argv[])
     free(controller->pending_queue);
     free(controller);
     */
+    
+    float latency=access_lateny(cycles,NUM_OF_BANKS);
+    uint64_t conflicts=number_of_conflict();
     printf("End Execution Time: ""%"PRIu64"\n", cycles);
+    printf("Number of Conflicts: ""%"PRIu64"\n", conflicts);
+    printf("Average Latency: %.3f\n", latency / num_requests);
 }
